@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "../framework parameters/compile time flags/base_flags.hpp"
+#include "../framework parameters/compile time flags/core_flags.hpp"
 
 // ================================
 //     BASIC PARTICLES TEMPLATE

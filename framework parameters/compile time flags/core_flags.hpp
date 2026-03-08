@@ -19,7 +19,7 @@
 #endif
 
 #ifndef VARIABLE_MASS
-    #define VARIABLE_MASS 1
+    #define VARIABLE_MASS 0
 #endif
 
 
