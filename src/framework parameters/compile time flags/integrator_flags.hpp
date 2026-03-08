@@ -28,7 +28,7 @@ namespace Framework {
 
     // Check user input
     static_assert(!(itsIPTS && !itsAdaptive), 
-        "ERROR: Individual timestepping requires adaptive timestepping to be enabled");
+        "INPUT ERROR: Individual timestepping requires adaptive timestepping to be enabled");
     static_assert(Integrator == LEAPFROG || Integrator == RK2 || Integrator == RK4, 
-        "ERROR: Invalid Integrator choice. Available options are: LEAPFROG, RK2, RK4");
+        "INPUT ERROR: Invalid Integrator choice. Available options are: LEAPFROG, RK2, RK4");
 }
