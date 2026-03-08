@@ -22,14 +22,6 @@
     #define VARIABLE_MASS 1
 #endif
 
-#ifndef ENABLE_GRAVITY
-    #define ENABLE_GRAVITY 0
-#endif
-
-#ifndef ENABLE_HYDRO
-    #define ENABLE_HYDRO 0
-#endif
-
 
 namespace Framework {
     // Choose precision type
@@ -42,13 +34,7 @@ namespace Framework {
     using Index = INDEX;
 
     // Constant vs Variable Mass Scheme 
-    inline constexpr bool VariableMass = (VARIABLE_MASS==1);    
-
-    // Flavor Flags
-    inline constexpr bool hasGravity = (ENABLE_GRAVITY==1);
-    inline constexpr bool hasHydro = (ENABLE_HYDRO==1);
-
-    // Choose Framework for each flavor
+    inline constexpr bool VariableMass = (VARIABLE_MASS==1);   
 
     // Check user input
     static_assert(std::is_floating_point_v<Real>, "INPUT ERROR: Precision can only be of floating point type");

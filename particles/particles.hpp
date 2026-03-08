@@ -1,49 +1,62 @@
-#pragma once
-
-#include <vector>
-#include "../framework parameters/global_parameters.hpp"
+#include <type_traits>
+#include "../framework parameters/compile time flags/flags.hpp"
+#include "base_particles.hpp"
+#include "hydro_particles.hpp"
+#include "gravity_particles.hpp"
 
 // ================================
-//     BASIC PARTICLES TEMPLATE
+//         PARTICLE WRAPPER
 // ================================
 
+// ----------------------------------------------------------------------------------
+// THE CODE BELOW IS EQUIVALENT TO THIS:
+//    using Base = BaseParticles;
+//    using Layer1 = std::conditional_t<hasGravity, GRAVITYparticles<Base>, Base>;
+//    using Layer2 = std::conditional_t<hasHydro, SPHparticles<Layer1>, Layer1>;
+//    using Particles = Layer2;
+//    ...
+// BUT IMPLEMENTED USING RECURSIVE TEMPLATES
+// -----------------------------------------------------------------------------------
 
-// ---------------------------------------------------------
-//     Other Frameworks' particles work like layers.
-//     They extend the functionalities and attributes
-//     of this template struct.
-// ---------------------------------------------------------
-struct BaseParticles {
-    using Real = Framework::Real;
-    static constexpr size_t Dims = Framework::Dims;
-    static constexpr bool VariableMass = Framework::VariableMass;
+namespace ParticleWrapper {
+    // ============================================================
+    // 1. THE LAYER POLICY
+    // Bundles a condition (hasGravity) with a layer (GravityLayer)
+    // ============================================================
+    template <bool Condition, template <typename> typename Layer>
+    struct OptionalLayer {
+        template <typename Base>
+        using Apply = std::conditional_t<Condition, Layer<Base>, Base>;
+    };
 
-    // ------------------------------
-    //    Base Particles attributes
-    // ------------------------------
-    size_t N;
-    std::vector<Real> pos[Dims];
-    std::vector<Real> vel[Dims];
-    std::vector<Real> acc[Dims];
-    std::vector<Real> mass;
-    Real total_mass;
-    Real r_com[Dims];
+    // ============================================================
+    // 2. THE ASSEMBLER ENGINE (Primary Template)
+    // Expects a Base and a variadic list of OptionalLayers
+    // ============================================================
+    template <typename Base, typename... Layers>
+    struct Assembler;
 
-    // ------------------
-    //    Constructors
-    // ------------------
-       
+    // BASE CASE: The pack of Layers is empty. We are done.
+    template<typename Base>
+    struct Assembler<Base> {
+        using Type = Base;
+    };
 
-    // ------------------------------
-    //    Base Particles Functions
-    // ------------------------------
+    // RECURSIVE CASE: We have at least one FirstLayer, and maybe RestLayers
+    template<typename Base, typename FirstLayer, typename... RestLayers>
+    struct Assembler<Base, FirstLayer, RestLayers...> {
+        // STEP A: Apply the first layer
+        using NewBase = typename FirstLayer::template Apply<Base>;
+        // STEP B: Pass the result and the remaining layers back into the loop
+        using Type = Assembler<NewBase, RestLayers...>::Type;
+    };
 
-    // Inline Mass Getter, to avoid branch logic for variable vs constant mass
-    Real getMass(size_t i) const {
-        if constexpr(VariableMass) return mass[i];
-        else return total_mass/Real(N);
-    }
+    // ============================================================
+    // 3. FINAL REGISTRY
+    // ============================================================
+    using Particles = Assembler<BaseParticles,
+                                OptionalLayer<hasGravity, GRAVITYparticles>,
+                                OptionalLayer<hasHydro, SPHparticles>
+                            >;
+}
 
-    // Center of Mass Setter for variable mass scheme
-    void setCOM();
-};
