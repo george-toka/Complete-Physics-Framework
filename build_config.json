@@ -1,0 +1,97 @@
+{
+    "PROJECT_NAME": "",
+    
+    "CMAKE_SETUP": {
+        "CMAKE_BUILD_TYPE": {
+            "value": "",
+            "hint": "Release",
+            "type": "enum",
+            "description": "Optimisation Level",
+            "options": ["Release", "Debug", "RelWithDebInfo"]
+        },
+
+        "EXTRA_CXX_FLAGS": {
+            "value": "",
+            "hint": "",
+            "type": "string",
+            "description": "WARNING: Compiler specific! Its (mis)use lies at the discretion of its user. Raw Compiler Flags set from user (e.g. -ffast-math, -O3)"
+        }
+    },
+    
+    "COMPILE_PARAMETERS": {
+        "CORE_FLAGS" : {
+            "DIMENSIONS" : {
+                "value": "",
+                "hint": "3",
+                "type": "int",
+                "options": ["1", "2", "3"],
+                "description": "Number of spatial dimensions"
+            },
+            "PRECISION" : {
+                "value": "",
+                "hint": "double",
+                "type": "enum",
+                "options": ["float", "double"],
+                "description": "Precision type for all parameters"
+            }, 
+            "INDEX" : {
+                "value": "",
+                "hint": "uint32_t",
+                "type": "enum",
+                "options": ["uint32_t", "uint64_t"],
+                "description": "Unsigned Integer for index arrays"
+            },
+            "VARIABLE_MASS": {
+                "value": "",
+                "hint": "0",
+                "type": "bool",
+                "options": ["0", "1"],
+                "description": "Particle System with constant (0) or variable (1) mass"
+            }
+        },
+        
+        "GRAVITY_FLAGS": {
+            "ENABLE_GRAVITY": {
+                "value": "",
+                "hint": "1",
+                "type": "bool",
+                "options": ["0", "1"],
+                "description": "Enable/Disable gravity effects"
+            }
+        },
+
+        "HYDRO_FLAGS": {
+            "ENABLE_HYDRO": {
+                "value": "",
+                "hint": "1",
+                "type": "bool",
+                "options": ["0", "1"],
+                "description": "Enable/Disable hydrodynamic effects"
+            }
+        },
+
+        "INTEGRATOR_FLAGS": {
+            "INTEGRATOR_TYPE": {
+                "value": "",
+                "hint": "RK2",
+                "type": "enum",
+                "options": ["LEAPFROG", "RK2", "RK4"],
+                "description": "Numerical integration method"
+            },
+            "ADAPTIVE_TIMESTEP": {
+                "value": "",
+                "hint": "1",
+                "type": "bool",
+                "options": ["0", "1"],
+                "description": "Toggle adaptive time-stepping (1) vs fixed time-stepping (0)"
+            },
+            "INDIVIDUAL_TIMESTEP": {
+                "value": "",
+                "hint": "0",
+                "type": "bool",
+                "options": ["0", "1"],
+                "description": "Toggle itsIPTS: Individual Particle Time-Steps"
+            }
+        }
+    }
+}
