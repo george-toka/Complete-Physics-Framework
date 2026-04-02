@@ -101,4 +101,4 @@ When running a simulation from scratch, the terminal workflow is always:
 3. **Paint the Universe:** `python iniconds.py --target iniconds.h5`
 4. **Iterate (Optional):** `python tweak_solver.py --theta 0.8 --target iniconds.h5`
 5. **Simulate:** `./engine --params runtime_params.json --data iniconds.h5`
-```
+
