@@ -47,3 +47,58 @@ You want to simulate Magnetohydrodynamics (MHD) and need every particle to have 
            "MagneticField": { "type": "float", "shape": "vector", "help": "Initial B-field" }
        }
    }
+
+   ```markdown
+4. Update `iniconds.py` to prompt the user for the initial magnetic setup and calculate the NumPy array.
+5. *Now* update the C++ IO tool to read the new HDF5 chunk.
+
+### Scenario B: Adding a New Physics Constant (e.g., Speed of Light)
+You are adding a relativistic module and need the engine to know `c`.
+
+1. Open the relevant domain schema (e.g., `iniconds_templates/core_fields.json` or a new `relativity_fields.json`).
+2. Add the constant to the `"Constants"` block.
+
+```json
+"Constants": {
+    "SpeedOfLight_C": { "value": "", "type": "float", "shape": "scalar", "help": "Speed of light in chosen units" }
+}
+```
+
+3. Run `pre_generator.py`. The script will automatically stamp this into the `/Header` attributes of your new HDF5 file.
+4. In C++, read it into your global `PhysicsContext` struct during the Zeroth Step.
+
+### Scenario C: Adding a New Algorithmic Setting (e.g., a new Tree Sorting method)
+You wrote a faster way to sort the KD-Tree in C++ and need a flag to turn it on, plus a new tolerance variable.
+
+1. **Do NOT** put this in the initial conditions schemas (it is not a physical property of the universe).
+2. Add the framework flag to `build_templates/default.json` so CMake knows to compile your new C++ headers.
+3. Add the runtime dials (`TREE_SORT_METHOD`, `SORT_TOLERANCE`) to `runtime_params.json`.
+4. Run the simulation. The C++ engine reads the new parameters at boot and executes.
+
+---
+
+## 🛑 The Golden Rules of the Codebase
+
+To prevent architecture collapse, any pull request or commit must adhere to these three rules:
+
+> **1. The C++ Engine is Dumb (In a Good Way)**
+> The C++ codebase should do zero complex initialization math. It does not know what a "Salpeter Mass Function" or a "Plummer Sphere" is. Python (`iniconds.py`) calculates the complex starting scenarios. C++ simply loads the arrays and executes the Hot Loop.
+
+> **2. Never Hardcode Constants in C++**
+> Never write `double G = 6.674e-11;` in the C++ source code. This permanently locks the engine into a single unit system. Read all physical constants from the HDF5 `/Header` at runtime so the engine can simulate an atom or a galaxy without recompiling.
+
+> **3. Protect the "Time Capsule"**
+> Derived quantities (Density, Pressure, Gravitational Potential) are calculated by the C++ engine during the "Zeroth Step." They belong in the Snapshot output files for visualization, but they **must not** be required in the `iniconds.h5` initialization file. Keep the input files as lean as physically possible.
+
+---
+
+## 🚀 Pipeline Execution Order
+
+When running a simulation from scratch, the terminal workflow is always:
+
+1. **Compile:** `python build_orchestrator.py --config build_templates/default.json`
+2. **Pre-Generate (Carve Memory):** `python pre_generator.py --particles 1000000 --out iniconds.h5`
+3. **Paint the Universe:** `python iniconds.py --target iniconds.h5`
+4. **Iterate (Optional):** `python tweak_solver.py --theta 0.8 --target iniconds.h5`
+5. **Simulate:** `./engine --params runtime_params.json --data iniconds.h5`
+```
